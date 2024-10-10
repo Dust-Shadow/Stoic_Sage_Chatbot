@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stoic Sage</title>
+    <style>
+      body {
+        font-family: "Helvetica Neue", Arial, sans-serif;
+        background: #f5f5f5;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+        margin: 0;
+      }
+      .chat-container {
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px;
+        width: 100%;
+        padding: 20px;
+      }
+      .chat-container h1 {
+        text-align: center;
+        color: #333;
+      }
+      .messages {
+        border: 1px solid #ccc;
+        border-radius: 8px;
+        padding: 10px;
+        height: 300px;
+        overflow-y: scroll;
+        background: #f9f9f9;
+      }
+      .message {
+        margin: 10px 0;
+        display: flex;
+        align-items: flex-start;
+      }
+      .message img {
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        margin-right: 10px;
+      }
+      .message.user {
+        justify-content: flex-end;
+      }
+      .message.user div {
+        background: #007bff;
+        color: #fff;
+        border-radius: 20px;
+        padding: 10px 15px;
+        max-width: 60%;
+      }
+      .message.bot div {
+        background: #e9ecef;
+        color: #333;
+        border-radius: 20px;
+        padding: 10px 15px;
+        max-width: 60%;
+      }
+      .input-container {
+        display: flex;
+        margin-top: 10px;
+      }
+      input {
+        flex: 1;
+        padding: 10px;
+        border: 1px solid #ccc;
+        border-radius: 20px;
+        outline: none;
+      }
+      button {
+        padding: 10px 15px;
+        background: #007bff;
+        color: #fff;
+        border: none;
+        border-radius: 20px;
+        margin-left: 10px;
+        cursor: pointer;
+        outline: none;
+      }
+      button:hover {
+        background: #0056b3;
+      }
+      .loading {
+        display: flex;
+        align-items: center;
+      }
+      .loading img {
+        margin-right: 10px;
+      }
+      .loading span {
+        font-style: italic;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="chat-container">
+      <h1>Stoic Sage</h1>
+      <div class="messages" id="messages"></div>
+      <div class="input-container">
+        <input type="text" id="messageInput" placeholder="What do you seek?" />
+        <input type="hidden" id="csrfToken" value="{% csrf_token %}" />
+        <button onclick="sendMessage()">Send</button>
+      </div>
+    </div>
+
+    <script>
+      function getCookie(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          const cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            const cookie = cookies[i].trim();
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+
+      const csrftoken =
+        getCookie("csrftoken") || document.getElementById("csrfToken").value;
+
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const message = input.value;
+        if (message.trim() === "") return;
+
+        displayMessage(message, "user");
+        displayLoading();
+
+        fetch("/api/chat/", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            "X-CSRFToken": csrftoken,
+          },
+          body: new URLSearchParams({ message: message }),
+        })
+          .then((response) => response.json())
+          .then((data) => {
+            removeLoading();
+            displayMessage(data.message, "bot");
+          })
+          .catch((error) => {
+            removeLoading();
+            console.error("Error:", error);
+          });
+
+        input.value = "";
+      }
+
+      function displayMessage(message, sender) {
+        const messagesContainer = document.getElementById("messages");
+        const messageDiv = document.createElement("div");
+        messageDiv.className = `message ${sender}`;
+        const messageContent = document.createElement("div");
+        messageContent.innerText = message;
+
+        if (sender === "bot") {
+          const img = document.createElement("img");
+          img.src =
+            "https://2.bp.blogspot.com/-PRJ5zBck0DI/VyCp8HhleqI/AAAAAAAAC7U/GWcifLJIy-QLoWbsQaBjlXgywFiq2sImQCLcB/s1600/Emperor%2BMarcus%2BAurelius.jpg";
+          messageDiv.appendChild(img);
+        }
+
+        messageDiv.appendChild(messageContent);
+        messagesContainer.appendChild(messageDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function displayLoading() {
+        const messagesContainer = document.getElementById("messages");
+        const loadingDiv = document.createElement("div");
+        loadingDiv.className = "message bot loading";
+        const loadingImg = document.createElement("img");
+        loadingImg.src =
+          "https://2.bp.blogspot.com/-PRJ5zBck0DI/VyCp8HhleqI/AAAAAAAAC7U/GWcifLJIy-QLoWbsQaBjlXgywFiq2sImQCLcB/s1600/Emperor%2BMarcus%2BAurelius.jpg";
+        const loadingText = document.createElement("span");
+        loadingText.innerText = "Loading...";
+        loadingDiv.appendChild(loadingImg);
+        loadingDiv.appendChild(loadingText);
+        messagesContainer.appendChild(loadingDiv);
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+      }
+
+      function removeLoading() {
+        const messagesContainer = document.getElementById("messages");
+        const loadingDiv = document.querySelector(".loading");
+        if (loadingDiv) {
+          messagesContainer.removeChild(loadingDiv);
+        }
+      }
+    </script>
+  </body>
+</html>

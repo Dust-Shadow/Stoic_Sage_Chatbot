@@ -24,8 +24,8 @@ Stoic Sage is a chatbot built with Django that delivers Stoic philosophy-based r
 
 1. **Clone the repository**:
    ```bash
-   git clone https://github.com/yourusername/stoic-sage-chatbot.git
-   cd stoic-sage-chatbot
+   git clone https://github.com/Dust-Shadow/Stoic_Sage_Chatbot.git
+   cd Stoic_Sage_Chatbot
 
 Install dependencies:
 
@@ -37,7 +37,7 @@ Setup Database:
 bash
 Copy code
 python manage.py migrate
-Load Initial Quotes Data: Ensure to load initial data of Stoic quotes if available or add it manually in the Django Admin panel.
+Load Initial Quotes Data: Ensure to load the initial data of Stoic quotes if available or add it manually in the Django Admin panel.
 
 Run Server:
 
@@ -48,10 +48,11 @@ Access the Chatbot: Open a browser and go to http://127.0.0.1:8000 to interact w
 
 Project Structure
 chat/: Contains the core chatbot application, including models, views, and utility functions.
-chat/templates/chat/: Contains HTML files for the frontend of the chatbot.
+chat/templates/chat/: Contains HTML files for the front end of the chatbot.
 static/: Stores static files like CSS and JavaScript.
 db.sqlite3: Default SQLite database.
 manage.py: Django management script.
+
 Usage
 User Interaction: Enter phrases, and Stoic Sage responds with quotes from Stoic philosophers. For general inquiries or simple greetings (e.g., "Hello", "Hi"), it replies with, "Greetings, how may I serve you today?".
 Keyword Filtering: Keywords like "what," "why," "where," "who," "I am," and "we are" are excluded from matching to better focus on relevant parts of the query.
